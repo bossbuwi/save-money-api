@@ -1,6 +1,7 @@
 package com.paradox.savemoney.service.impl;
 
 import com.paradox.savemoney.entity.Item;
+import com.paradox.savemoney.exception.EntityNotFoundException;
 import com.paradox.savemoney.repository.ItemRepository;
 import com.paradox.savemoney.service.ItemService;
 import jakarta.inject.Inject;
@@ -26,7 +27,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item getItemById(long id) {
-        return itemRepository.findById(id).orElseThrow();
+        return itemRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item"));
     }
 
     @Override
@@ -45,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteItem(long id) {
-        itemRepository.deleteById(id);
+        Item item = itemRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item"));
+        itemRepository.delete(item);
     }
 }
