@@ -25,6 +25,8 @@ build:
     when: on_success
     access: all
     expire_in: 1 hour
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"  # Run only on main branch
 
 docker-build-push:
   stage: docker
@@ -34,12 +36,15 @@ docker-build-push:
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_BUILDKIT: 1 # Enable BuildKit for better secret handling
   dependencies:
     - build # Fetch artifacts from build stage
   before_script:
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
-    - docker build -t $DOCKER_IMAGE:$TAG .
+    - docker build -t $DOCKER_IMAGE:$TAG \
+        --build-arg SUPABASE_DB_URL=$SUPABASE_DB_URL \
+        --build-arg SUPABASE_API_KEY=$SUPABASE_API_KEY .
     - docker push $DOCKER_IMAGE:$TAG
   rules:
     - if: $CI_COMMIT_BRANCH == "main"  # Run only on main branch

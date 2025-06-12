@@ -21,6 +21,11 @@ public class ItemController {
         return new ResponseEntity<>(itemService.test(), HttpStatus.OK);
     }
 
+    @GetMapping("/supatest")
+    public ResponseEntity<String> supaTest() {
+        return new ResponseEntity<>(itemService.supaTest(), HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<List<Item>> getAllItems() {
         return new ResponseEntity<>(itemService.getAllItems(), HttpStatus.OK);
