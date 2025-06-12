@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Prevent local profile from being committed ###
+src/main/resources/application-local.properties
