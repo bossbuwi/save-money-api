@@ -1,0 +1,35 @@
+stages:
+  - build
+  - docker
+
+variables:
+  DOCKER_IMAGE: "bossbuwi/spring-boot-app"
+  # Use CI_COMMIT_SHORT_SHA for unique tags or adjust as needed
+  TAG: $CI_COMMIT_REF_SLUG
+
+# Cache Maven dependencies for faster builds
+cache:
+  paths:
+    - .m2/repository
+
+build:
+  stage: build
+  image: maven:3.8.6-openjdk-17
+  script:
+    - mvn clean package -DskipTests
+
+docker-build-push:
+  stage: docker
+  image: docker:24.0.7
+  services:
+    - docker:24.0.7-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+  script:
+    - docker build -t $DOCKER_IMAGE:$TAG .
+    - docker push $DOCKER_IMAGE:$TAG
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"  # Run only on main branch
