@@ -1,4 +1,5 @@
 FROM eclipse-temurin:21
 RUN mkdir /opt/app
-COPY target/save-money-0.0.2-PRE.jar /opt/app
-CMD ["java", "-jar", "/opt/app/save-money-0.0.2-PRE.jar"]
+# Copy from CI artifact location
+COPY target/*.jar /opt/app/app.jar
+CMD ["java", "-jar", "/opt/app/app.jar"]
