@@ -17,6 +17,13 @@ build:
   image: maven:3.9.9-eclipse-temurin-21-noble
   script:
     - mvn clean package -DskipTests
+  artifacts:
+    untracked: false
+    when: on_success
+    access: all
+    expire_in: 10 mins
+    paths:
+      - "target/"
 
 docker-build-push:
   stage: docker
