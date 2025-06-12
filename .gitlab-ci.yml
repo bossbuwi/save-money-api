@@ -3,27 +3,28 @@ stages:
   - docker
 
 variables:
-  DOCKER_IMAGE: "bossbuwi/spring-boot-app"
-  # Use CI_COMMIT_SHORT_SHA for unique tags or adjust as needed
+  DOCKER_IMAGE: "paradox/save-money-api"
   TAG: $CI_COMMIT_REF_SLUG
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
-# Cache Maven dependencies for faster builds
 cache:
   paths:
     - .m2/repository
+    - target
 
 build:
   stage: build
   image: maven:3.9.9-eclipse-temurin-21-noble
   script:
-    - mvn clean package -DskipTests
-  artifacts:
+    - mvn clean package
+  artifacts: # pass artifacts to next stage
+    paths:
+      - target/*.jar
+      - Dockerfile
     untracked: false
     when: on_success
     access: all
-    expire_in: 10 mins
-    paths:
-      - "target/"
+    expire_in: 1 hour
 
 docker-build-push:
   stage: docker
@@ -33,6 +34,8 @@ docker-build-push:
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
+  dependencies:
+    - build # Fetch artifacts from build stage
   before_script:
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
