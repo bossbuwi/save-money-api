@@ -1,5 +1,6 @@
 package com.paradox.savemoney.service.impl;
 
+import com.paradox.savemoney.api.supabase.SupabaseApiService;
 import com.paradox.savemoney.entity.Item;
 import com.paradox.savemoney.exception.EntityNotFoundException;
 import com.paradox.savemoney.repository.ItemRepository;
@@ -7,10 +8,13 @@ import com.paradox.savemoney.service.ItemService;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
 public class ItemServiceImpl implements ItemService {
+    @Inject
+    private SupabaseApiService supabaseApiService;
 
     @Inject
     ItemRepository itemRepository;
@@ -18,6 +22,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public String test() {
         return "Hello World!";
+    }
+
+    @Override
+    public String supaTest() {
+        return supabaseApiService.getAllItems().block(Duration.ofSeconds(2));
     }
 
     @Override
