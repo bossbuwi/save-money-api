@@ -45,7 +45,8 @@ docker-build-push:
     - docker build \
         --build-arg SUPABASE_DB_URL=$SUPABASE_DB_URL \
         --build-arg SUPABASE_API_KEY=$SUPABASE_API_KEY \
-        -t $DOCKER_IMAGE:$TAG .
+        -t $DOCKER_IMAGE:$TAG \
+        .
     - docker push $DOCKER_IMAGE:$TAG
   rules:
     - if: $CI_COMMIT_BRANCH == "main"  # Run only on main branch
