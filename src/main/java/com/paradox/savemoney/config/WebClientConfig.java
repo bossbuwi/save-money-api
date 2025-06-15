@@ -17,7 +17,7 @@ public class WebClientConfig {
     public WebClient webClient() {
         return WebClient.builder()
                 .baseUrl(supabaseUri)
-                .defaultHeader(ACCEPT, ACCEPT_JSON)
+                .defaultHeader(ACCEPT, APPLICATION_JSON)
                 .build();
     }
 }

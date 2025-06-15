@@ -6,7 +6,6 @@ import java.util.List;
 
 public interface ItemService {
     String test();
-    String supaTest();
     List<Item> getAllItems();
     Item getItemById(long id);
     Item addItem(Item item);

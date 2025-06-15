@@ -1,17 +1,19 @@
 package com.paradox.savemoney.controller;
 
-import com.paradox.savemoney.entity.Item;
+import com.paradox.savemoney.api.supabase.model.CreateItemRequest;
+import com.paradox.savemoney.api.supabase.service.SupabaseApiService;
 import com.paradox.savemoney.service.ItemService;
 import jakarta.inject.Inject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/items")
 public class ItemController {
+    @Inject
+    SupabaseApiService supabaseApiService;
 
     @Inject
     ItemService itemService;
@@ -21,34 +23,18 @@ public class ItemController {
         return new ResponseEntity<>(itemService.test(), HttpStatus.OK);
     }
 
-    @GetMapping("/supatest")
-    public ResponseEntity<String> supaTest() {
-        return new ResponseEntity<>(itemService.supaTest(), HttpStatus.OK);
+    @GetMapping(value = "/index")
+    public Mono<ResponseEntity<String>> getAllItems() {
+        return supabaseApiService.getAllItems();
     }
 
-    @GetMapping
-    public ResponseEntity<List<Item>> getAllItems() {
-        return new ResponseEntity<>(itemService.getAllItems(), HttpStatus.OK);
+    @GetMapping(value = "/{id}")
+    public Mono<ResponseEntity<String>> getItemById(@PathVariable String id) {
+        return supabaseApiService.getItem(id);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Item> getItemById(@PathVariable Long id) {
-        return new ResponseEntity<>(itemService.getItemById(id), HttpStatus.OK);
-    }
-
-    @PostMapping
-    public ResponseEntity<Item> addItem(@RequestBody Item newItem) {
-        return new ResponseEntity<>(itemService.addItem(newItem), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Item> editItem(@PathVariable Long id, @RequestBody Item newItem) {
-        return new ResponseEntity<>(itemService.editItem(id, newItem), HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
-        itemService.deleteItem(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping(value = "/")
+    public Mono<ResponseEntity<String>> addItem(@RequestBody CreateItemRequest request) {
+        return supabaseApiService.addItem(request);
     }
 }
