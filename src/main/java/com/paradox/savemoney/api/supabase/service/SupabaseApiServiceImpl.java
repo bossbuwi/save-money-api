@@ -2,6 +2,7 @@ package com.paradox.savemoney.api.supabase.service;
 
 import com.paradox.savemoney.api.supabase.model.CreateItemRequest;
 import com.paradox.savemoney.api.supabase.model.ItemBase;
+import com.paradox.savemoney.api.supabase.model.UpdateItemRequest;
 import com.paradox.savemoney.exception.EntityNotFoundException;
 import com.paradox.savemoney.exception.UpstreamApiException;
 import org.springframework.beans.factory.annotation.Value;
@@ -107,7 +108,12 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
     }
 
     @Override
-    public Mono<String> editItem(ItemBase itemBase) {
+    public Mono<ResponseEntity<String>> editItem(UpdateItemRequest request) {
+        return null;
+    }
+
+    @Override
+    public Mono<ResponseEntity<String>> editItemById(String id, CreateItemRequest request) {
         return null;
     }
 
