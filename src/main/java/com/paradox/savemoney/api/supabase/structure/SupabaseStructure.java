@@ -7,6 +7,7 @@ public class SupabaseStructure {
     }
 
     public static class HeaderValue {
-        public static final String REPRESENTATION = "return=representation";
+        public static final String RETURN_REPRESENTATION = "return=representation";
+        public static final String RESOLUTION_MERGE_DUPLICATES = "resolution=merge-duplicates";
     }
 }

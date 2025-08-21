@@ -1,10 +1,12 @@
 package com.paradox.savemoney.api.supabase.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class UpdateItemRequest extends ItemBase {
-    private long id;
+    @NotNull
+    private Long _id;
 }
