@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 public class ApiException {
@@ -14,7 +15,8 @@ public class ApiException {
     private String status;
     private String message;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss.s")
-    private LocalDateTime timestamp;
+    private final LocalDateTime timestamp;
+    private Map<String, String> errors;
 
     private ApiException() {
         this.timestamp = LocalDateTime.now();
@@ -31,5 +33,13 @@ public class ApiException {
         this.httpStatus = httpStatus;
         this.status = httpStatus.getReasonPhrase();
         this.message = message;
+    }
+
+    public ApiException(HttpStatus httpStatus, String message, Map<String, String> errors) {
+        this();
+        this.httpStatus = httpStatus;
+        this.status = httpStatus.getReasonPhrase();
+        this.message = message;
+        this.errors = errors;
     }
 }
