@@ -6,18 +6,19 @@ import com.paradox.savemoney.exception.EntityNotFoundException;
 import com.paradox.savemoney.exception.UpstreamApiException;
 import com.paradox.savemoney.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import static com.paradox.savemoney.api.supabase.structure.SupabaseStructure.HeaderKey.APIKEY;
 import static com.paradox.savemoney.api.supabase.structure.SupabaseStructure.HeaderKey.PREFER;
-import static com.paradox.savemoney.api.supabase.structure.SupabaseStructure.HeaderValue.RESOLUTION_MERGE_DUPLICATES;
 import static com.paradox.savemoney.api.supabase.structure.SupabaseStructure.HeaderValue.RETURN_REPRESENTATION;
-import static com.paradox.savemoney.config.structure.HttpStructure.HeaderValue.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 @Service
 public class SupabaseApiServiceImpl implements SupabaseApiService {
@@ -36,20 +37,9 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
         final String path = "/rest/v1/items?select=*";
         return webClient.get()
                 .uri(path)
-                .headers(headers -> {
-                    headers.add(AUTHORIZATION, authHeaderToken);
-                    headers.add(APIKEY, authHeaderToken);
-                })
+                .headers(this::setCommonHeaders)
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
-                                        response.statusCode(),
-                                        errorBody,
-                                        response.headers().asHttpHeaders()
-                                )))
-                )
+                .onStatus(this::isError, this::handleError)
                 .toEntity(String.class);
     }
 
@@ -58,34 +48,12 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
         final String path = "/rest/v1/items?_id=eq." + id;
         return webClient.get()
                 .uri(path)
-                .headers(headers -> {
-                    headers.add(AUTHORIZATION, authHeaderToken);
-                    headers.add(APIKEY, authHeaderToken);
-                })
+                .headers(this::setCommonHeaders)
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
-                                        response.statusCode(),
-                                        errorBody,
-                                        response.headers().asHttpHeaders()
-                                )))
-                )
+                .onStatus(this::isError, this::handleError)
                 .toEntity(String.class)
-                .handle((responseEntity, sink) -> {
-                    if ("[]".equals(responseEntity.getBody())) {
-                        sink.error(new EntityNotFoundException("Item"));
-                        return;
-                    }
-                    String responseBody = responseEntity.getBody();
-                    String newBody = stringUtils.stripSurroundingBrackets(responseBody);
-                    ResponseEntity<String> newResponse = new ResponseEntity<>(
-                            newBody,
-                            responseEntity.getHeaders(),
-                            responseEntity.getStatusCode());
-                    sink.next(newResponse);
-                });
+                .handle((responseEntity, sink) ->
+                        processResponse(responseEntity, sink, true));
     }
 
     @Override
@@ -94,105 +62,32 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
         return webClient.post()
                 .uri(path)
                 .headers(headers -> {
-                    headers.add(AUTHORIZATION, authHeaderToken);
-                    headers.add(APIKEY, authHeaderToken);
-                    headers.add(CONTENT_TYPE, APPLICATION_JSON);
+                    setCommonHeaders(headers);
                     headers.add(PREFER, RETURN_REPRESENTATION);
                 })
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
-                                        response.statusCode(),
-                                        errorBody,
-                                        response.headers().asHttpHeaders()
-                                )))
-                )
+                .onStatus(this::isError, this::handleError)
                 .toEntity(String.class)
-                .handle((responseEntity, sink) -> {
-                    String responseBody = responseEntity.getBody();
-                    String newBody = stringUtils.stripSurroundingBrackets(responseBody);
-                    ResponseEntity<String> newResponse = new ResponseEntity<>(
-                            newBody,
-                            responseEntity.getHeaders(),
-                            responseEntity.getStatusCode());
-                    sink.next(newResponse);
-                });
+                .handle((responseEntity, sink) ->
+                        processResponse(responseEntity, sink, false));
     }
 
     @Override
-    public Mono<ResponseEntity<String>> updateItem(UpdateItemRequest request) {
-        final String path = "/rest/v1/items";
-        return webClient.post()
-                .uri(path)
-                .headers(headers -> {
-                    headers.add(AUTHORIZATION, authHeaderToken);
-                    headers.add(APIKEY, authHeaderToken);
-                    headers.add(CONTENT_TYPE, APPLICATION_JSON);
-                    headers.add(PREFER, RETURN_REPRESENTATION);
-                    headers.add(PREFER, RESOLUTION_MERGE_DUPLICATES);
-                })
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
-                                        response.statusCode(),
-                                        errorBody,
-                                        response.headers().asHttpHeaders()
-                                )))
-                )
-                .toEntity(String.class)
-                .handle((responseEntity, sink) -> {
-                    String responseBody = responseEntity.getBody();
-                    String newBody = stringUtils.stripSurroundingBrackets(responseBody);
-                    ResponseEntity<String> newResponse = new ResponseEntity<>(
-                            newBody,
-                            responseEntity.getHeaders(),
-                            responseEntity.getStatusCode());
-                    sink.next(newResponse);
-                });
-    }
-
-    @Override
-    public Mono<ResponseEntity<String>> patchItemById(String id, CreateItemRequest request) {
+    public Mono<ResponseEntity<String>> patchItemById(String id, UpdateItemRequest request) {
         final String path = "/rest/v1/items?_id=eq." + id;
         return webClient.patch()
                 .uri(path)
                 .headers(headers -> {
-                    headers.add(AUTHORIZATION, authHeaderToken);
-                    headers.add(APIKEY, authHeaderToken);
-                    headers.add(CONTENT_TYPE, APPLICATION_JSON);
+                    setCommonHeaders(headers);
                     headers.add(PREFER, RETURN_REPRESENTATION);
                 })
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
-                                        response.statusCode(),
-                                        errorBody,
-                                        response.headers().asHttpHeaders()
-                                )))
-                )
+                .onStatus(this::isError, this::handleError)
                 .toEntity(String.class)
-                .handle((responseEntity, sink) -> {
-                    if ("[]".equals(responseEntity.getBody())) {
-                        sink.error(new EntityNotFoundException("Item"));
-                        return;
-                    }
-                    String responseBody = responseEntity.getBody();
-                    String newBody = stringUtils.stripSurroundingBrackets(responseBody);
-                    ResponseEntity<String> newResponse = new ResponseEntity<>(
-                            newBody,
-                            responseEntity.getHeaders(),
-                            responseEntity.getStatusCode());
-                    sink.next(newResponse);
-                });
+                .handle((responseEntity, sink) ->
+                        processResponse(responseEntity, sink, true));
     }
 
     @Override
@@ -201,34 +96,50 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
         return webClient.delete()
                 .uri(path)
                 .headers(headers -> {
-                    headers.add(AUTHORIZATION, authHeaderToken);
-                    headers.add(APIKEY, authHeaderToken);
-                    headers.add(CONTENT_TYPE, APPLICATION_JSON);
+                    setCommonHeaders(headers);
                     headers.add(PREFER, RETURN_REPRESENTATION);
                 })
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
-                                        response.statusCode(),
-                                        errorBody,
-                                        response.headers().asHttpHeaders()
-                                )))
-                )
+                .onStatus(this::isError, this::handleError)
                 .toEntity(String.class)
-                .handle((responseEntity, sink) -> {
-                    if ("[]".equals(responseEntity.getBody())) {
-                        sink.error(new EntityNotFoundException("Item"));
-                        return;
-                    }
-                    String responseBody = responseEntity.getBody();
-                    String newBody = stringUtils.stripSurroundingBrackets(responseBody);
-                    ResponseEntity<String> newResponse = new ResponseEntity<>(
-                            newBody,
-                            responseEntity.getHeaders(),
-                            responseEntity.getStatusCode());
-                    sink.next(newResponse);
-                });
+                .handle((responseEntity, sink) ->
+                        processResponse(responseEntity, sink, true));
+    }
+
+    private void setCommonHeaders(HttpHeaders headers) {
+        headers.add(AUTHORIZATION, authHeaderToken);
+        headers.add(APIKEY, authHeaderToken);
+    }
+
+    private boolean isError(HttpStatusCode status) {
+        return status.is4xxClientError() || status.is5xxServerError();
+    }
+
+    private Mono<Throwable> handleError(ClientResponse response) {
+        return response.bodyToMono(String.class)
+                .flatMap(errorBody -> Mono.error(new UpstreamApiException(
+                        response.statusCode(),
+                        errorBody,
+                        response.headers().asHttpHeaders()
+                )));
+    }
+
+    private void processResponse(ResponseEntity<String> responseEntity,
+                                 SynchronousSink<ResponseEntity<String>> sink,
+                                 boolean checkEmpty) {
+        String responseBody = responseEntity.getBody();
+
+        if (checkEmpty && "[]".equals(responseEntity.getBody())) {
+            sink.error(new EntityNotFoundException("Item"));
+            return;
+        }
+
+        String newBody = stringUtils.stripSurroundingBrackets(responseBody);
+
+        ResponseEntity<String> newResponse = new ResponseEntity<>(
+                newBody,
+                responseEntity.getHeaders(),
+                responseEntity.getStatusCode());
+        sink.next(newResponse);
     }
 }

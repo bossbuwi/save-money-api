@@ -1,28 +1,20 @@
 package com.paradox.savemoney.api.supabase.service;
 
 import com.paradox.savemoney.api.supabase.model.CreateItemRequest;
-import com.paradox.savemoney.api.supabase.model.UpdateItemRequest;
-import com.paradox.savemoney.exception.UpstreamApiException;
 import com.paradox.savemoney.util.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static com.paradox.savemoney.config.structure.HttpStructure.HeaderValue.APPLICATION_JSON;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,28 +89,5 @@ public class SupabaseApiServiceImplTest {
         StepVerifier.create(supabaseApiService.addItem(request))
                 .expectNextMatches(response -> response.getBody().equals("{\"id\":\"new-id\"}"))
                 .verifyComplete();
-    }
-
-    @Test
-    void updateItem_Error() {
-        UpdateItemRequest request = new UpdateItemRequest();
-        when(webClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/rest/v1/items")).thenReturn(requestBodySpec);
-        when(requestBodySpec.headers(any())).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.onStatus(any(), any())).thenAnswer(invocation -> {
-            ClientResponse response =
-                    ClientResponse.create(HttpStatus.BAD_REQUEST)
-                            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-                            .body("{\"error\":\"Invalid data\"}")
-                            .build();
-            return responseSpec;
-        });
-        when(responseSpec.toEntity(String.class)).thenReturn(Mono.error(new UpstreamApiException(
-                HttpStatus.BAD_REQUEST, "{\"error\":\"Invalid data\"}", new HttpHeaders())));
-
-        StepVerifier.create(supabaseApiService.updateItem(request))
-                .verifyError(UpstreamApiException.class);
     }
 }

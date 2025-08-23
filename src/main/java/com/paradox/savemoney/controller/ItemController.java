@@ -37,17 +37,12 @@ public class ItemController {
     }
 
     @PostMapping(value = "/")
-    public Mono<ResponseEntity<String>> addItem(@RequestBody CreateItemRequest request) {
+    public Mono<ResponseEntity<String>> addItem(@Valid @RequestBody CreateItemRequest request) {
         return supabaseApiService.addItem(request);
     }
 
-    @PutMapping(value = "/")
-    public Mono<ResponseEntity<String>> updateItem(@Valid @RequestBody UpdateItemRequest request) {
-        return supabaseApiService.updateItem(request);
-    }
-
     @PatchMapping(value = "/{id}")
-    public Mono<ResponseEntity<String>> patchItem(@PathVariable String id, @Valid @RequestBody CreateItemRequest request) {
+    public Mono<ResponseEntity<String>> patchItem(@PathVariable String id, @RequestBody UpdateItemRequest request) {
         return supabaseApiService.patchItemById(id, request);
     }
 
