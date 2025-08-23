@@ -5,6 +5,7 @@ import com.paradox.savemoney.api.supabase.model.UpdateItemRequest;
 import com.paradox.savemoney.exception.EntityNotFoundException;
 import com.paradox.savemoney.exception.UpstreamApiException;
 import com.paradox.savemoney.util.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -27,7 +28,8 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
     private final WebClient webClient;
     private final StringUtils stringUtils;
 
-    public SupabaseApiServiceImpl(WebClient webClient, StringUtils stringUtils) {
+    public SupabaseApiServiceImpl(@Qualifier("supabaseWebClient") WebClient webClient,
+                                  StringUtils stringUtils) {
         this.webClient = webClient;
         this.stringUtils = stringUtils;
     }
