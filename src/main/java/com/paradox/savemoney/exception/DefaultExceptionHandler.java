@@ -1,16 +1,15 @@
 package com.paradox.savemoney.exception;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
-public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
+public class DefaultExceptionHandler {
 
     @ExceptionHandler(UpstreamApiException.class)
     public ResponseEntity<String> handleUpstreamApiException(UpstreamApiException ex) {
@@ -37,12 +36,9 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(apiException);
     }
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+//    @Override
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
@@ -50,6 +46,19 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
         ApiException apiException = new ApiException(HttpStatus.BAD_REQUEST, "Validation failed", errors);
 
         return buildErrorResponse(apiException);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+        if (cause instanceof UnrecognizedPropertyException unrecognizedException) {
+            String fieldName = unrecognizedException.getPropertyName();
+            String errorMessage = "Unknown field: " + fieldName;
+            return buildErrorResponse(new ApiException(HttpStatus.BAD_REQUEST, errorMessage));
+        }
+
+        // For other types of message not readable errors
+        return buildErrorResponse(new ApiException(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
     private ResponseEntity<Object> buildErrorResponse(ApiException ex) {

@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ItemBase {
-    private double amount;
+    private Double amount;
     private String description;
 }

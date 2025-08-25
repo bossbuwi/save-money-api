@@ -1,4 +1,4 @@
-package com.paradox.savemoney.config;
+package com.paradox.savemoney.api.supabase.structure;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,11 +9,11 @@ import static com.paradox.savemoney.config.structure.HttpStructure.HeaderKey.*;
 import static com.paradox.savemoney.config.structure.HttpStructure.HeaderValue.*;
 
 @Configuration
-public class WebClientConfig {
+public class SupabaseWebClientConfig {
     @Value("${api.supabase.url}")
     private String supabaseUri;
 
-    @Bean
+    @Bean("supabaseWebClient")
     public WebClient webClient() {
         return WebClient.builder()
                 .baseUrl(supabaseUri)

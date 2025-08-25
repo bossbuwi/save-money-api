@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.context.request.WebRequest;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,12 +67,7 @@ public class DefaultExceptionHandlerTest {
         when(ex.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
-        HttpHeaders headers = new HttpHeaders();
-        WebRequest request = mock(WebRequest.class);
-
-        ResponseEntity<Object> response = exceptionHandler.handleMethodArgumentNotValid(
-                ex, headers, HttpStatus.BAD_REQUEST, request
-        );
+        ResponseEntity<Object> response = exceptionHandler.handleMethodArgumentNotValid(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(APPLICATION_JSON, response.getHeaders().getFirst("Content-Type"));
@@ -83,7 +77,7 @@ public class DefaultExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, body.getHttpStatus());
         assertEquals("Validation failed", body.getMessage());
 
-        Map<String, String> errors = (Map<String, String>) body.getErrors();
+        Map<String, String> errors = body.getErrors();
         assertEquals("must not be null", errors.get("field1"));
         assertEquals("must be positive", errors.get("field2"));
     }
