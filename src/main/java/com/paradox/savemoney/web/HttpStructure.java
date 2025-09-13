@@ -1,4 +1,4 @@
-package com.paradox.savemoney.config.structure;
+package com.paradox.savemoney.web;
 
 public class HttpStructure {
     public static class HeaderKey {
