@@ -7,6 +7,5 @@ public class HttpStructure {
 
     public static class HeaderValue {
         public static final String APPLICATION_JSON = "application/json";
-        public static final String AUTHORIZATION_BEARER = "Bearer ";
     }
 }
