@@ -1,11 +1,8 @@
 package com.paradox.savemoney.util;
 
-import org.springframework.stereotype.Service;
-
-@Service
 public class StringUtils {
 
-    public String stripSurroundingBrackets(String str) {
+    public static String stripSurroundingBrackets(String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }

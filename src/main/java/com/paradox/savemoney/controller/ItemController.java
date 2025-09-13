@@ -4,6 +4,7 @@ import com.paradox.savemoney.api.supabase.model.CreateItemRequest;
 import com.paradox.savemoney.api.supabase.model.UpdateItemRequest;
 import com.paradox.savemoney.api.supabase.service.SupabaseApiService;
 import com.paradox.savemoney.service.ItemService;
+import com.paradox.savemoney.util.HttpUtils;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,27 +28,37 @@ public class ItemController {
     }
 
     @GetMapping(value = "/index")
-    public Mono<ResponseEntity<String>> getAllItems() {
-        return supabaseApiService.getAllItems();
+    public Mono<ResponseEntity<String>> getAllItems(@RequestHeader("Authorization") String authHeader) {
+        String token = HttpUtils.extractBearerToken(authHeader);
+        return supabaseApiService.getAllItems(token);
     }
 
     @GetMapping(value = "/{id}")
-    public Mono<ResponseEntity<String>> getItemById(@PathVariable String id) {
-        return supabaseApiService.getItem(id);
+    public Mono<ResponseEntity<String>> getItemById(@RequestHeader("Authorization") String authHeader,
+                                                    @PathVariable String id) {
+        String token = HttpUtils.extractBearerToken(authHeader);
+        return supabaseApiService.getItem(token,id);
     }
 
     @PostMapping(value = "/")
-    public Mono<ResponseEntity<String>> addItem(@Valid @RequestBody CreateItemRequest request) {
-        return supabaseApiService.addItem(request);
+    public Mono<ResponseEntity<String>> addItem(@RequestHeader("Authorization") String authHeader,
+                                                @Valid @RequestBody CreateItemRequest request) {
+        String token = HttpUtils.extractBearerToken(authHeader);
+        return supabaseApiService.addItem(token,request);
     }
 
     @PatchMapping(value = "/{id}")
-    public Mono<ResponseEntity<String>> patchItem(@PathVariable String id, @RequestBody UpdateItemRequest request) {
-        return supabaseApiService.patchItemById(id, request);
+    public Mono<ResponseEntity<String>> patchItem(@RequestHeader("Authorization") String authHeader,
+                                                  @PathVariable String id,
+                                                  @RequestBody UpdateItemRequest request) {
+        String token = HttpUtils.extractBearerToken(authHeader);
+        return supabaseApiService.patchItemById(token, id, request);
     }
 
     @DeleteMapping(value = "/{id}")
-    public Mono<ResponseEntity<String>> deleteItemById(@PathVariable String id) {
-        return supabaseApiService.deleteItem(id);
+    public Mono<ResponseEntity<String>> deleteItemById(@RequestHeader("Authorization") String authHeader,
+                                                       @PathVariable String id) {
+        String token = HttpUtils.extractBearerToken(authHeader);
+        return supabaseApiService.deleteItem(token, id);
     }
 }
