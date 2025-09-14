@@ -43,7 +43,7 @@ docker-build-push:
     - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
   script:
     #docker build -t "$DOCKER_IMAGE:$TAG" .
-    - docker build -build-arg PORT=PORT --build-arg AUTH_URL=$AUTH_URL --build-arg AUTH_API_KEY=$AUTH_API_KEY --build-arg SUPABASE_DB_URL=$SUPABASE_DB_URL --build-arg SUPABASE_API_KEY=$SUPABASE_API_KEY -t $DOCKER_IMAGE:$TAG .
+    - docker build --build-arg PORT=PORT --build-arg AUTH_URL=$AUTH_URL --build-arg AUTH_API_KEY=$AUTH_API_KEY --build-arg SUPABASE_DB_URL=$SUPABASE_DB_URL --build-arg SUPABASE_API_KEY=$SUPABASE_API_KEY -t $DOCKER_IMAGE:$TAG .
     - echo "Pushing Docker image"
     - docker push "$DOCKER_IMAGE:$TAG"
   rules:
