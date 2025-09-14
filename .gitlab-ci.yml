@@ -3,7 +3,7 @@ stages:
   - docker
 
 variables:
-  DOCKER_IMAGE: "bossbuwi/save-money-api"
+  DOCKER_IMAGE: "paradoxhorizondevs/save-money-api"
   TAG: $CI_COMMIT_REF_SLUG
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
