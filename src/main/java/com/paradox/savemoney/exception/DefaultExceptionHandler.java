@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.paradox.savemoney.config.structure.HttpStructure.HeaderValue.APPLICATION_JSON;
+import static com.paradox.savemoney.web.HttpStructure.HeaderValue.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -36,7 +36,6 @@ public class DefaultExceptionHandler {
         return buildErrorResponse(apiException);
     }
 
-//    @Override
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
@@ -59,6 +58,12 @@ public class DefaultExceptionHandler {
 
         // For other types of message not readable errors
         return buildErrorResponse(new ApiException(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException ex) {
+        ApiException apiException = new ApiException(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        return buildErrorResponse(apiException);
     }
 
     private ResponseEntity<Object> buildErrorResponse(ApiException ex) {

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.paradox.savemoney.config.structure.HttpStructure.HeaderValue.APPLICATION_JSON;
+import static com.paradox.savemoney.web.HttpStructure.HeaderValue.APPLICATION_JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
