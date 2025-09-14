@@ -9,4 +9,5 @@ ENV SUPABASE_API_KEY=$SUPABASE_API_KEY
 RUN mkdir /opt/app
 # Copy from CI artifact location
 COPY target/*.jar /opt/app/app.jar
+EXPOSE $PORT
 CMD ["java", "-jar", "/opt/app/app.jar"]
