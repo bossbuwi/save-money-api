@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -58,6 +59,12 @@ public class DefaultExceptionHandler {
 
         // For other types of message not readable errors
         return buildErrorResponse(new ApiException(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<Object> handleMissingRequestHeaderException(MissingRequestHeaderException ex) {
+        ApiException apiException = new ApiException(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        return buildErrorResponse(apiException);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
