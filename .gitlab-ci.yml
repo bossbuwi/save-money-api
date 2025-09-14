@@ -42,7 +42,7 @@ docker-build-push:
   before_script:
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
-    - docker build --build-arg AUTH_URL=$AUTH_URL --build-arg AUTH_API_KEY=$AUTH_API_KEY -build-arg SUPABASE_DB_URL=$SUPABASE_DB_URL --build-arg SUPABASE_API_KEY=$SUPABASE_API_KEY -t $DOCKER_IMAGE:$TAG .
+    - docker build --build-arg AUTH_URL=$AUTH_URL --build-arg AUTH_API_KEY=$AUTH_API_KEY --build-arg SUPABASE_DB_URL=$SUPABASE_DB_URL --build-arg SUPABASE_API_KEY=$SUPABASE_API_KEY -t $DOCKER_IMAGE:$TAG .
     - docker push $DOCKER_IMAGE:$TAG
   rules:
     - if: $CI_COMMIT_BRANCH == "main"  # Run only on main branch
