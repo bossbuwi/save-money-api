@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.paradox.savemoney.api.supabase.structure.SupabaseStructure.HeaderKey.APIKEY;
-import static com.paradox.savemoney.config.structure.HttpStructure.HeaderKey.*;
-import static com.paradox.savemoney.config.structure.HttpStructure.HeaderValue.*;
+import static com.paradox.savemoney.web.HttpStructure.HeaderKey.ACCEPT;
+import static com.paradox.savemoney.web.HttpStructure.HeaderValue.APPLICATION_JSON;
 
 @Configuration
 public class SupabaseWebClientConfig {
