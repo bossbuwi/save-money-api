@@ -42,7 +42,6 @@ docker-build-push:
     - echo "Logging in to Docker Hub"
     - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
   script:
-    - echo "Building Docker image: $DOCKER_IMAGE:$TAG"
     - docker build -t "$DOCKER_IMAGE:$TAG" .
     - echo "Pushing Docker image"
     - docker push "$DOCKER_IMAGE:$TAG"
