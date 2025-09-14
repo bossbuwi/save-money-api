@@ -1,10 +1,16 @@
 FROM eclipse-temurin:21
 # Receive build arguments
-#ARG SUPABASE_DB_URL
-#ARG SUPABASE_API_KEY
+ARG SUPABASE_DB_URL
+ARG SUPABASE_API_KEY
+ARG AUTH_URL
+ARG AUTH_API_KEY
+ARG PORT
 # Set the arguments as environment variables
-#ENV SUPABASE_DB_URL=$SUPABASE_DB_URL
-#ENV SUPABASE_API_KEY=$SUPABASE_API_KEY
+ENV SUPABASE_DB_URL=$SUPABASE_DB_URL
+ENV SUPABASE_API_KEY=$SUPABASE_API_KEY
+ENV AUTH_URL=$AUTH_URL
+ENV AUTH_API_KEY=$AUTH_API_KEY
+ENV PORT=$PORT
 # Create the directory where the package will be stored
 RUN mkdir /opt/app
 # Copy from CI artifact location
