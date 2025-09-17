@@ -1,5 +1,5 @@
 # Stage 1: Build the JAR
-FROM maven:3.8.6-openjdk-21 AS builder
+FROM maven:3.8.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
@@ -17,7 +17,7 @@ ENV SUPABASE_API_KEY=$SUPABASE_API_KEY
 ENV AUTH_URL=$AUTH_URL
 ENV AUTH_API_KEY=$AUTH_API_KEY
 ENV PORT=$PORT
-RUN mkdir /opt/app
+RUN mkdir -p /opt/app
 COPY --from=builder /app/target/*.jar /opt/app/app.jar
 EXPOSE $PORT
 CMD ["java", "-jar", "/opt/app/app.jar"]
