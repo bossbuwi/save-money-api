@@ -31,7 +31,9 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
                 .headers(headers -> headers.setBearerAuth(authToken))
                 .retrieve()
                 .onStatus(webClientHelper::isError, webClientHelper::handleError)
-                .toEntity(String.class);
+                .toEntity(String.class)
+                .handle((responseEntity, sink) ->
+                        webClientHelper.processResponse(responseEntity, sink, true));
     }
 
     @Override
