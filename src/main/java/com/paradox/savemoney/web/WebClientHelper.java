@@ -3,6 +3,7 @@ package com.paradox.savemoney.web;
 import com.paradox.savemoney.exception.EntityNotFoundException;
 import com.paradox.savemoney.exception.UpstreamApiException;
 import com.paradox.savemoney.util.StringUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -37,9 +38,12 @@ public class WebClientHelper {
         }
 
         String newBody = StringUtils.stripSurroundingBrackets(responseBody);
+        HttpHeaders newHeaders = new HttpHeaders();
+        newHeaders.set(HttpHeaders.CONTENT_TYPE, "application/json");
         ResponseEntity<String> newResponse = ResponseEntity
                 .status(responseEntity.getStatusCode())
-                .headers(responseEntity.getHeaders())
+//                .headers(responseEntity.getHeaders())
+                .headers(newHeaders)
                 .body(newBody);
         sink.next(newResponse);
     }
