@@ -40,6 +40,8 @@ public class WebClientHelper {
         String newBody = StringUtils.stripSurroundingBrackets(responseBody);
         HttpHeaders newHeaders = new HttpHeaders();
         newHeaders.set(HttpHeaders.CONTENT_TYPE, "application/json");
+        newHeaders.set("Cache-Control", "no-cache");
+        newHeaders.set("X-Content-Type-Options", "nosniff");
         ResponseEntity<String> newResponse = ResponseEntity
                 .status(responseEntity.getStatusCode())
 //                .headers(responseEntity.getHeaders())
