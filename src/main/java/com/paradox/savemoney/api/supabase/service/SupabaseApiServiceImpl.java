@@ -33,7 +33,7 @@ public class SupabaseApiServiceImpl implements SupabaseApiService {
                 .onStatus(webClientHelper::isError, webClientHelper::handleError)
                 .toEntity(String.class)
                 .handle((responseEntity, sink) ->
-                        webClientHelper.processResponse(responseEntity, sink, true));
+                        webClientHelper.processResponse(responseEntity, sink, false));
     }
 
     @Override

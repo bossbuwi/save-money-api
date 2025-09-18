@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.paradox</groupId>
 	<artifactId>save-money</artifactId>
-	<version>0.0.7-PRE</version>
+	<version>0.0.8-PRE</version>
 	<name>Save Money API</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>

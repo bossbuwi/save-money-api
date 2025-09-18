@@ -77,6 +77,14 @@ public class SupabaseApiServiceImplTest {
         when(responseSpec.toEntity(String.class)).thenReturn(Mono.just(responseEntity));
         when(webClientHelper.isError(any())).thenReturn(false);
 
+        // Mock processResponse to pass through the response
+        doAnswer(invocation -> {
+            ResponseEntity<String> response = invocation.getArgument(0);
+            reactor.core.publisher.SynchronousSink<ResponseEntity<String>> sink = invocation.getArgument(1);
+            sink.next(response);
+            return null;
+        }).when(webClientHelper).processResponse(any(), any(), eq(false));
+
         // Act & Assert
         StepVerifier.create(supabaseApiService.getAllItems(authToken))
                 .expectNext(responseEntity)
